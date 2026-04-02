@@ -6,27 +6,84 @@
 <title>Gorilla Tag Tournaments</title>
 
 <style>
-body { margin:0; font-family:Arial; background:#0a0a0a; color:#eaeaea; }
 
+/* BASE */
+body {
+  margin:0;
+  font-family:Arial;
+  background:#0a0a0a;
+  color:#eaeaea;
+}
+
+/* HIDE SITE UNTIL SELECTED */
+#site {
+  display:none;
+}
+
+/* PLATFORM MODES */
+body.phone { font-size:20px; }
+body.pc { font-size:16px; }
+
+/* START SCREEN (SEPARATE PAGE) */
+#startScreen {
+  position:fixed;
+  inset:0;
+  background:#000;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+}
+
+#startScreen h1 {
+  font-size:2rem;
+  margin-bottom:30px;
+}
+
+.startBtn {
+  width:250px;
+  padding:20px;
+  margin:10px;
+  font-size:1.2rem;
+  border:none;
+  border-radius:12px;
+  background:#222;
+  color:white;
+  cursor:pointer;
+}
+
+.startBtn:hover {
+  background:#333;
+}
+
+/* HEADER */
 header {
-  padding:30px 15px;
+  padding:25px;
   text-align:center;
   background:linear-gradient(180deg,#141414,#0a0a0a);
-  border-bottom:1px solid #222;
 }
-header h1 { font-size:2rem; }
 
-/* SECTIONS */
-.section { padding:20px; border-bottom:1px solid #1a1a1a; }
+header h1 {
+  font-size:2rem;
+}
+
+/* SECTION */
+.section {
+  padding:20px;
+}
 
 /* GRID */
 .grid {
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:20px;
+  gap:15px;
 }
 
-/* CARDS */
+body.phone .grid {
+  grid-template-columns:1fr;
+}
+
+/* CARD */
 .card {
   background:#111;
   padding:20px;
@@ -34,273 +91,263 @@ header h1 { font-size:2rem; }
 }
 
 /* INPUTS */
-.card input, .card button, .card textarea {
+input, button {
   width:100%;
   padding:16px;
   margin-top:10px;
-  border-radius:14px;
+  border-radius:12px;
+  border:1px solid #333;
   background:#111;
   color:white;
-  border:1px solid #333;
-  font-size:1rem;
 }
 
-button { min-height:50px; }
+body.phone input,
+body.phone button {
+  padding:20px;
+  font-size:1.2rem;
+}
 
-/* REMOVE NUMBER SQUARE */
+/* REMOVE NUMBER SPINNER */
 input[type=number] {
   width:70px;
-  height:40px;
   text-align:center;
-  font-size:1rem;
-  border-radius:10px;
-  border:1px solid #333;
-  background:#111;
-  color:white;
   -moz-appearance:textfield;
 }
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-  -webkit-appearance:none;
-  margin:0;
-}
 
-/* TABLE */
-table {
-  width:100%;
-  border-collapse:collapse;
-  display:block;
-  overflow-x:auto;
-}
-th, td {
-  padding:10px;
-  border-bottom:1px solid #333;
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance:none;
 }
 
 /* BRACKETS */
 #brackets {
   display:flex;
-  gap:30px;
-  justify-content:center;
+  gap:20px;
 }
+
+body.phone #brackets {
+  flex-direction:column;
+}
+
 .bracket {
   background:#111;
   padding:15px;
   border-radius:12px;
-  min-width:280px;
-  width:100%;
-}
-.match {
-  background:#222;
-  margin:8px 0;
-  padding:10px;
-  border-radius:10px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-.match span {
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:5px;
+  flex:1;
 }
 
-/* MOBILE */
-@media (max-width:768px){
-  .grid { grid-template-columns:1fr; }
-  #brackets { flex-direction:column; }
+.match {
+  background:#222;
+  padding:10px;
+  margin:8px 0;
+  border-radius:10px;
 }
 
 /* ADMIN */
-#adminPanel { display:none; }
+#adminPanel {
+  display:none;
+}
 
 </style>
 </head>
 
 <body>
 
+<!-- START SCREEN -->
+<div id="startScreen">
+  <h1>Select Platform</h1>
+  <button class="startBtn" onclick="setPlatform('phone')">Phone</button>
+  <button class="startBtn" onclick="setPlatform('pc')">Computer</button>
+</div>
+
+<!-- MAIN SITE -->
+<div id="site">
+
 <header>
-<h1>Gorilla Tag Tournaments</h1>
+  <h1>Gorilla Tag Tournaments</h1>
 </header>
+
+<!-- PLATFORM SETTINGS -->
+<div class="section">
+  <div class="card">
+    <h3>Platform Settings</h3>
+    <button onclick="resetPlatform()">Reset Platform Selection</button>
+  </div>
+</div>
 
 <!-- REGISTER -->
 <div class="section grid">
-<div class="card" style="grid-column: span 2;">
-<h2>Register</h2>
-<input id="email" placeholder="Email">
-<input id="team" placeholder="Team Name">
-<button onclick="connectDiscord()">Connect Discord</button>
-<button onclick="register()">Register</button>
-</div>
+  <div class="card" style="grid-column: span 2;">
+    <h2>Register</h2>
+    <input id="email" placeholder="Email">
+    <input id="team" placeholder="Team Name">
+    <button onclick="register()">Register</button>
+  </div>
 </div>
 
-<!-- BRACKETS -->
+<!-- BRACKET -->
 <div class="section">
-<h2>Bracket</h2>
-<div id="brackets">
-<div class="bracket">
-<h3>Winner</h3>
-<div id="winnerBracket"></div>
-</div>
-<div class="bracket">
-<h3>Loser</h3>
-<div id="loserBracket"></div>
-</div>
-</div>
+  <h2>Bracket</h2>
+  <div id="brackets">
+    <div class="bracket">
+      <h3>Winner</h3>
+      <div id="winner"></div>
+    </div>
+    <div class="bracket">
+      <h3>Loser</h3>
+      <div id="loser"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ADMIN -->
 <div class="section">
-<div class="card">
-<input id="adminPass" placeholder="Admin Password">
-<button onclick="login()">Login</button>
-</div>
+  <div class="card">
+    <input id="adminPass" placeholder="Admin Password">
+    <button onclick="login()">Login</button>
+  </div>
 </div>
 
 <div id="adminPanel" class="section">
-
-<div class="card">
-<button onclick="toggleEdit()">Edit ScoreBoard</button>
-<button onclick="clearTeams()">Clear Teams</button>
-<button onclick="createTournament()">Create Tournament</button>
+  <div class="card">
+    <button onclick="toggleEdit()">Edit ScoreBoard</button>
+    <button onclick="createTournament()">Create Tournament</button>
+    <button onclick="clearTeams()">Clear Teams</button>
+  </div>
 </div>
-
-<table id="table"></table>
 
 </div>
 
 <script>
-let data = JSON.parse(localStorage.getItem("teams")) || [];
-let currentTournament = JSON.parse(localStorage.getItem("tournament")) || null;
 
-let isAdmin = false;
-let editing = false;
+/* PLATFORM */
+function setPlatform(type){
+  localStorage.setItem("platform", type);
+  document.body.className = type;
 
-function save(){
-  localStorage.setItem("teams", JSON.stringify(data));
-  localStorage.setItem("tournament", JSON.stringify(currentTournament));
+  document.getElementById("startScreen").style.display="none";
+  document.getElementById("site").style.display="block";
 }
 
-function generateId(){
-  return Date.now()+""+Math.floor(Math.random()*1000);
+function resetPlatform(){
+  localStorage.removeItem("platform");
+  location.reload();
+}
+
+/* CHECK SAVED PLATFORM */
+(function(){
+  const saved = localStorage.getItem("platform");
+  if(saved){
+    document.body.className = saved;
+    document.getElementById("startScreen").style.display="none";
+    document.getElementById("site").style.display="block";
+  }
+})();
+
+/* DATA */
+let teams = JSON.parse(localStorage.getItem("teams")) || [];
+let tournament = JSON.parse(localStorage.getItem("tournament")) || null;
+
+let editing = false;
+
+/* SAVE */
+function save(){
+  localStorage.setItem("teams", JSON.stringify(teams));
+  localStorage.setItem("tournament", JSON.stringify(tournament));
 }
 
 /* REGISTER */
-function connectDiscord(){
-  alert("Discord Connected (mock)");
-}
-
 function register(){
   const email = document.getElementById("email").value;
   const team = document.getElementById("team").value || "No Name";
 
   if(!email) return alert("Enter email");
 
-  data.push({id:generateId(), email, team});
+  teams.push({id:Date.now(), team, email});
   save();
-  loadTable();
   generateMatches();
-  updateBrackets();
+  render();
 }
 
 /* ADMIN */
 function login(){
-  if(document.getElementById("adminPass").value === "admin"){
-    isAdmin = true;
+  if(document.getElementById("adminPass").value==="admin"){
     document.getElementById("adminPanel").style.display="block";
-    loadTable();
-    updateBrackets();
   }
 }
 
 function toggleEdit(){
   editing = !editing;
-  updateBrackets();
-}
-
-/* TABLE */
-function loadTable(){
-  const t = document.getElementById("table");
-  t.innerHTML = "<tr><th>Team</th><th>Email</th></tr>";
-  data.forEach(d=>{
-    t.innerHTML += `<tr><td>${d.team}</td><td>${d.email}</td></tr>`;
-  });
+  render();
 }
 
 /* TOURNAMENT */
 function createTournament(){
-  currentTournament = {matches:[]};
+  tournament = {matches:[]};
   generateMatches();
   save();
-  updateBrackets();
+  render();
 }
 
 function clearTeams(){
-  data=[];
-  currentTournament=null;
+  teams = [];
+  tournament = null;
   save();
-  loadTable();
-  updateBrackets();
+  render();
 }
 
 /* MATCHES */
 function generateMatches(){
-  if(!currentTournament) return;
-  currentTournament.matches=[];
+  if(!tournament) return;
+  tournament.matches = [];
 
-  for(let i=0;i<data.length;i+=2){
-    currentTournament.matches.push({
-      id:generateId(),
-      team1:data[i]?.id,
-      team2:data[i+1]?.id || null,
+  for(let i=0;i<teams.length;i+=2){
+    tournament.matches.push({
+      team1:teams[i]?.id,
+      team2:teams[i+1]?.id,
       score1:0,
       score2:0
     });
   }
-  save();
 }
 
-/* BRACKETS */
-function updateBrackets(){
-  const w = document.getElementById("winnerBracket");
-  w.innerHTML="";
+/* RENDER */
+function render(){
+  const w = document.getElementById("winner");
+  w.innerHTML = "";
 
-  if(!currentTournament) return;
+  if(!tournament) return;
 
-  currentTournament.matches.forEach(m=>{
-    const t1 = data.find(x=>x.id===m.team1);
-    const t2 = data.find(x=>x.id===m.team2);
+  tournament.matches.forEach(m=>{
+    const t1 = teams.find(t=>t.id===m.team1);
+    const t2 = teams.find(t=>t.id===m.team2);
 
     const div = document.createElement("div");
     div.className="match";
 
-    const input1 = document.createElement("input");
-    input1.type="number";
-    input1.value=m.score1;
-    input1.disabled=!editing;
-    input1.oninput=()=>{ m.score1=parseInt(input1.value)||0; save(); };
+    const s1 = document.createElement("input");
+    s1.type="number";
+    s1.value=m.score1;
+    s1.disabled=!editing;
+    s1.oninput=()=>{ m.score1=parseInt(s1.value)||0; save(); };
 
-    const input2 = document.createElement("input");
-    input2.type="number";
-    input2.value=m.score2;
-    input2.disabled=!editing || !t2;
-    input2.oninput=()=>{ m.score2=parseInt(input2.value)||0; save(); };
+    const s2 = document.createElement("input");
+    s2.type="number";
+    s2.value=m.score2;
+    s2.disabled=!editing;
+    s2.oninput=()=>{ m.score2=parseInt(s2.value)||0; save(); };
 
-    const span = document.createElement("span");
-    span.innerText = (t1?.team||"TBD")+" ";
-    span.appendChild(input1);
-    span.appendChild(document.createTextNode(" vs "+(t2?.team||"BYE")+" "));
-    if(t2) span.appendChild(input2);
+    div.appendChild(document.createTextNode((t1?.team||"TBD")+" "));
+    div.appendChild(s1);
+    div.appendChild(document.createTextNode(" vs "+(t2?.team||"TBD")+" "));
+    div.appendChild(s2);
 
-    div.appendChild(span);
     w.appendChild(div);
   });
 }
 
 /* INIT */
-loadTable();
-updateBrackets();
+render();
+
 </script>
 
 </body>
