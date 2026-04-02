@@ -2,293 +2,305 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gorilla Tag Tournaments</title>
+
 <style>
 body { margin:0; font-family:Arial; background:#0a0a0a; color:#eaeaea; }
-header { padding:40px 20px; text-align:center; background:linear-gradient(180deg, #141414, #0a0a0a); border-bottom:1px solid #222; }
-header h1 { font-size:3rem; letter-spacing:3px; text-transform:uppercase; background:linear-gradient(90deg,#fff,#bbb,#fff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow:0 0 20px rgba(255,255,255,0.15); }
-.section { padding:25px; border-bottom:1px solid #1a1a1a; }
-.grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
-.card { background:#111; padding:25px; border-radius:18px; box-sizing:border-box; }
-.card input, .card button, .card textarea { width:100%; padding:14px; margin-top:10px; border-radius:14px; background:#111; color:white; border:1px solid #333; box-sizing:border-box; }
-.card button:hover { background:#222; cursor:pointer; transform:translateY(-2px) scale(1.03); }
+
+header {
+  padding:30px 15px;
+  text-align:center;
+  background:linear-gradient(180deg,#141414,#0a0a0a);
+  border-bottom:1px solid #222;
+}
+header h1 { font-size:2rem; }
+
+/* SECTIONS */
+.section { padding:20px; border-bottom:1px solid #1a1a1a; }
+
+/* GRID */
+.grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+}
+
+/* CARDS */
+.card {
+  background:#111;
+  padding:20px;
+  border-radius:16px;
+}
+
+/* INPUTS */
+.card input, .card button, .card textarea {
+  width:100%;
+  padding:16px;
+  margin-top:10px;
+  border-radius:14px;
+  background:#111;
+  color:white;
+  border:1px solid #333;
+  font-size:1rem;
+}
+
+button { min-height:50px; }
+
+/* REMOVE NUMBER SQUARE */
+input[type=number] {
+  width:70px;
+  height:40px;
+  text-align:center;
+  font-size:1rem;
+  border-radius:10px;
+  border:1px solid #333;
+  background:#111;
+  color:white;
+  -moz-appearance:textfield;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance:none;
+  margin:0;
+}
+
+/* TABLE */
+table {
+  width:100%;
+  border-collapse:collapse;
+  display:block;
+  overflow-x:auto;
+}
+th, td {
+  padding:10px;
+  border-bottom:1px solid #333;
+}
+
+/* BRACKETS */
+#brackets {
+  display:flex;
+  gap:30px;
+  justify-content:center;
+}
+.bracket {
+  background:#111;
+  padding:15px;
+  border-radius:12px;
+  min-width:280px;
+  width:100%;
+}
+.match {
+  background:#222;
+  margin:8px 0;
+  padding:10px;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.match span {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:5px;
+}
+
+/* MOBILE */
+@media (max-width:768px){
+  .grid { grid-template-columns:1fr; }
+  #brackets { flex-direction:column; }
+}
+
+/* ADMIN */
 #adminPanel { display:none; }
-table { width:100%; border-collapse:collapse; border-radius:12px; overflow:hidden; }
-th, td { padding:12px; border-bottom:1px solid #333; text-align:left; }
-.action-buttons button { margin-right:8px; margin-top:4px; border-radius:12px; padding:6px 10px; font-size:0.85rem; }
-#brackets { display:flex; flex-wrap:wrap; gap:50px; margin-top:20px; justify-content:center; }
-.bracket { background:#111; padding:10px; border-radius:12px; min-width:250px; }
-.bracket h3 { text-align:center; border-bottom:1px solid #333; padding-bottom:5px; margin-bottom:10px; }
-.match { background:#222; margin:5px 0; padding:6px 10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; }
-.match span { flex:1; }
-.match input { width:50px; margin-left:5px; }
-.match button { margin-left:5px; margin-top:5px; }
+
 </style>
 </head>
+
 <body>
 
 <header>
 <h1>Gorilla Tag Tournaments</h1>
 </header>
 
+<!-- REGISTER -->
 <div class="section grid">
 <div class="card" style="grid-column: span 2;">
-<h2>Contact / Register</h2>
-<label>Email</label>
-<input type="email" id="email" placeholder="Email Address">
-<label>Team Name (Optional)</label>
-<input type="text" id="team" placeholder="Team Name">
-<button id="connectDiscordBtn">Connect Discord</button>
-<button id="registerBtn">Register</button>
+<h2>Register</h2>
+<input id="email" placeholder="Email">
+<input id="team" placeholder="Team Name">
+<button onclick="connectDiscord()">Connect Discord</button>
+<button onclick="register()">Register</button>
 </div>
 </div>
 
+<!-- BRACKETS -->
 <div class="section">
 <h2>Bracket</h2>
 <div id="brackets">
 <div class="bracket">
-<h3>Winner Bracket</h3>
+<h3>Winner</h3>
 <div id="winnerBracket"></div>
 </div>
 <div class="bracket">
-<h3>Loser Bracket</h3>
+<h3>Loser</h3>
 <div id="loserBracket"></div>
 </div>
 </div>
 </div>
 
+<!-- ADMIN -->
 <div class="section">
-<h2>Admin Login</h2>
 <div class="card">
-<label>Password</label>
-<input type="password" id="adminPass" placeholder="Password">
-<button id="loginBtn">Login</button>
+<input id="adminPass" placeholder="Admin Password">
+<button onclick="login()">Login</button>
 </div>
 </div>
 
-<div class="section" id="adminPanel">
-<h2>Admin Panel</h2>
+<div id="adminPanel" class="section">
 
 <div class="card">
-<label>Actions</label>
-<button id="clearTeamsBtn">Clear All Teams</button>
-<button id="exportDataBtn">Export Data</button>
-<button id="endTournamentBtn">End Tournament</button>
-</div>
-
-<div class="card">
-<label>Create Tournament</label>
-<input type="text" id="tournamentName" placeholder="Tournament Name">
-<input type="date" id="tournamentDate">
-<input type="time" id="tournamentTime">
-<textarea id="tournamentDetails" placeholder="Additional details"></textarea>
-<button id="createTournamentBtn">Create Tournament</button>
+<button onclick="toggleEdit()">Edit ScoreBoard</button>
+<button onclick="clearTeams()">Clear Teams</button>
+<button onclick="createTournament()">Create Tournament</button>
 </div>
 
 <table id="table"></table>
+
 </div>
 
 <script>
-// ===== DATA =====
 let data = JSON.parse(localStorage.getItem("teams")) || [];
-let tournaments = JSON.parse(localStorage.getItem("tournaments")) || [];
-let currentTournament = null;
-let connectedDiscord = null;
+let currentTournament = JSON.parse(localStorage.getItem("tournament")) || null;
+
 let isAdmin = false;
-const ADMIN_PASSWORD = "GTag#9xL!2Qz@7";
+let editing = false;
 
-// ===== HELPERS =====
-function saveTeams(){ localStorage.setItem("teams", JSON.stringify(data)); }
-function saveTournaments(){ localStorage.setItem("tournaments", JSON.stringify(tournaments)); }
-function generateId(){ return Date.now().toString(36)+'-'+Math.floor(Math.random()*1000); }
-function saveCurrentTournament() {
-    if(currentTournament) localStorage.setItem("currentTournamentId", currentTournament.id);
-    else localStorage.removeItem("currentTournamentId");
+function save(){
+  localStorage.setItem("teams", JSON.stringify(data));
+  localStorage.setItem("tournament", JSON.stringify(currentTournament));
 }
 
-// ===== DISCORD =====
-document.getElementById("connectDiscordBtn").addEventListener("click",()=>{
-    connectedDiscord = prompt("Enter Discord username#0000");
-    alert("Discord connected: "+connectedDiscord);
-});
+function generateId(){
+  return Date.now()+""+Math.floor(Math.random()*1000);
+}
 
-// ===== REGISTER =====
-document.getElementById("registerBtn").addEventListener("click", ()=>{
-    const email = document.getElementById("email").value.trim();
-    const team = document.getElementById("team").value.trim() || "No Name";
-    if(!email) return alert("Enter your email!");
-    data.push({id: generateId(), email, team, discord: connectedDiscord || "Not connected"});
-    saveTeams();
+/* REGISTER */
+function connectDiscord(){
+  alert("Discord Connected (mock)");
+}
+
+function register(){
+  const email = document.getElementById("email").value;
+  const team = document.getElementById("team").value || "No Name";
+
+  if(!email) return alert("Enter email");
+
+  data.push({id:generateId(), email, team});
+  save();
+  loadTable();
+  generateMatches();
+  updateBrackets();
+}
+
+/* ADMIN */
+function login(){
+  if(document.getElementById("adminPass").value === "admin"){
+    isAdmin = true;
+    document.getElementById("adminPanel").style.display="block";
     loadTable();
     updateBrackets();
-    alert("Registered successfully!");
-});
+  }
+}
 
-// ===== ADMIN LOGIN =====
-document.getElementById("loginBtn").addEventListener("click", ()=>{
-    if(document.getElementById("adminPass").value === ADMIN_PASSWORD){
-        document.getElementById("adminPanel").style.display = "block";
-        isAdmin = true;
-        loadTable();
-        updateBrackets();
-        alert("Admin access granted!");
-    } else alert("Access denied");
-});
+function toggleEdit(){
+  editing = !editing;
+  updateBrackets();
+}
 
-// ===== ADMIN BUTTONS =====
-document.getElementById("clearTeamsBtn").addEventListener("click", ()=>{
-    if(!isAdmin) return alert("Admins only");
-    if(confirm("Clear all teams?")){ data=[]; saveTeams(); loadTable(); updateBrackets(); }
-});
-document.getElementById("exportDataBtn").addEventListener("click", ()=>{
-    if(!isAdmin) return alert("Admins only");
-    navigator.clipboard.writeText(JSON.stringify(data,null,2));
-    alert("Copied data!");
-});
-document.getElementById("endTournamentBtn").addEventListener("click", ()=>{
-    if(!isAdmin) return alert("Admins only");
-    if(!currentTournament) return alert("No active tournament");
-    if(confirm("End tournament?")){
-        currentTournament=null;
-        saveCurrentTournament();
-        document.getElementById("winnerBracket").innerHTML="";
-        document.getElementById("loserBracket").innerHTML="";
-        alert("Tournament ended");
-    }
-});
-document.getElementById("createTournamentBtn").addEventListener("click", ()=>{
-    if(!isAdmin) return alert("Admins only");
-    const name=document.getElementById("tournamentName").value;
-    const date=document.getElementById("tournamentDate").value;
-    const time=document.getElementById("tournamentTime").value;
-    const details=document.getElementById("tournamentDetails").value;
-    if(!name) return alert("Enter tournament name");
-    const tournament={id:generateId(),name,date,time,details,teams:[],losers:[]};
-    tournaments.push(tournament);
-    saveTournaments();
-    currentTournament=tournament;
-    saveCurrentTournament();
-    updateBrackets();
-    alert("Tournament created!");
-});
-
-// ===== TABLE =====
+/* TABLE */
 function loadTable(){
-    const table = document.getElementById("table");
-    table.innerHTML = "<tr><th>Team</th><th>Email</th><th>Discord</th><th>Actions</th></tr>";
-    data.forEach(t=>{
-        const row = table.insertRow();
-        row.insertCell(0).innerText = t.team;
-        row.insertCell(1).innerText = t.email;
-        row.insertCell(2).innerText = t.discord;
-        const actions = row.insertCell(3);
-        actions.className = "action-buttons";
-        if(isAdmin){
-            const delBtn = document.createElement("button");
-            delBtn.textContent = "Delete";
-            delBtn.onclick = ()=> deleteTeam(t.id);
-            const editBtn = document.createElement("button");
-            editBtn.textContent = "Edit";
-            editBtn.onclick = ()=> editTeam(t.id);
-            const promoteBtn = document.createElement("button");
-            promoteBtn.textContent = "Promote";
-            promoteBtn.onclick = ()=> promoteTeam(t.id);
-            actions.appendChild(delBtn);
-            actions.appendChild(editBtn);
-            actions.appendChild(promoteBtn);
-        } else actions.innerHTML="—";
+  const t = document.getElementById("table");
+  t.innerHTML = "<tr><th>Team</th><th>Email</th></tr>";
+  data.forEach(d=>{
+    t.innerHTML += `<tr><td>${d.team}</td><td>${d.email}</td></tr>`;
+  });
+}
+
+/* TOURNAMENT */
+function createTournament(){
+  currentTournament = {matches:[]};
+  generateMatches();
+  save();
+  updateBrackets();
+}
+
+function clearTeams(){
+  data=[];
+  currentTournament=null;
+  save();
+  loadTable();
+  updateBrackets();
+}
+
+/* MATCHES */
+function generateMatches(){
+  if(!currentTournament) return;
+  currentTournament.matches=[];
+
+  for(let i=0;i<data.length;i+=2){
+    currentTournament.matches.push({
+      id:generateId(),
+      team1:data[i]?.id,
+      team2:data[i+1]?.id || null,
+      score1:0,
+      score2:0
     });
+  }
+  save();
 }
 
-// ===== ADMIN FUNCTIONS =====
-function deleteTeam(id){
-    if(!isAdmin) return;
-    if(confirm("Delete this team?")){
-        data = data.filter(t=>t.id !== id);
-        saveTeams();
-        loadTable();
-        updateBrackets();
-    }
-}
-function editTeam(id){
-    if(!isAdmin) return;
-    const t = data.find(x=>x.id===id);
-    if(!t) return;
-    const newName = prompt("New team name:", t.team);
-    if(newName!==null){ t.team=newName; saveTeams(); loadTable(); updateBrackets(); }
-}
-function promoteTeam(id){
-    if(!isAdmin) return;
-    if(!currentTournament) return alert("Create tournament first");
-    const t = data.find(x=>x.id===id);
-    if(!t) return;
-    if(currentTournament.teams.find(x=>x.id===t.id)) return alert("Already promoted!");
-    currentTournament.teams.push({...t, score:0});
-    saveTournaments();
-    saveCurrentTournament();
-    updateBrackets();
-}
-
-// ===== BRACKETS =====
+/* BRACKETS */
 function updateBrackets(){
-    const winnerDiv = document.getElementById("winnerBracket");
-    const loserDiv = document.getElementById("loserBracket");
-    winnerDiv.innerHTML=""; loserDiv.innerHTML="";
-    if(!currentTournament) return;
+  const w = document.getElementById("winnerBracket");
+  w.innerHTML="";
 
-    const winners = [...currentTournament.teams];
-    for(let i=0;i<winners.length;i+=2){
-        const t1=winners[i], t2=winners[i+1];
-        const match = document.createElement("div");
-        match.className="match";
-        match.innerHTML = `<span>${t1.team} (${isAdmin?`<input type="number" min="0" value="${t1.score}" id="score${t1.id}">`:`${t1.score}`}) vs ${t2?t2.team+' ('+(isAdmin?`<input type="number" min="0" value="${t2.score}" id="score${t2.id}">`:`${t2.score}`)+')':'BYE'}</span>`;
-        if(isAdmin){
-            const btn = document.createElement("button");
-            btn.textContent = "Set Winner";
-            btn.onclick = ()=> setWinner(t1.id,t2?.id);
-            match.appendChild(btn);
-        }
-        winnerDiv.appendChild(match);
-    }
+  if(!currentTournament) return;
 
-    currentTournament.losers.forEach(l=>{
-        const m = document.createElement("div");
-        m.className="match";
-        m.innerText = l.team + " vs TBD";
-        loserDiv.appendChild(m);
-    });
+  currentTournament.matches.forEach(m=>{
+    const t1 = data.find(x=>x.id===m.team1);
+    const t2 = data.find(x=>x.id===m.team2);
+
+    const div = document.createElement("div");
+    div.className="match";
+
+    const input1 = document.createElement("input");
+    input1.type="number";
+    input1.value=m.score1;
+    input1.disabled=!editing;
+    input1.oninput=()=>{ m.score1=parseInt(input1.value)||0; save(); };
+
+    const input2 = document.createElement("input");
+    input2.type="number";
+    input2.value=m.score2;
+    input2.disabled=!editing || !t2;
+    input2.oninput=()=>{ m.score2=parseInt(input2.value)||0; save(); };
+
+    const span = document.createElement("span");
+    span.innerText = (t1?.team||"TBD")+" ";
+    span.appendChild(input1);
+    span.appendChild(document.createTextNode(" vs "+(t2?.team||"BYE")+" "));
+    if(t2) span.appendChild(input2);
+
+    div.appendChild(span);
+    w.appendChild(div);
+  });
 }
 
-// ===== SET WINNER =====
-function setWinner(id1,id2){
-    if(!isAdmin) return;
-    const t1=currentTournament.teams.find(x=>x.id===id1);
-    const t2=currentTournament.teams.find(x=>x.id===id2);
-    if(!t1) return;
-    const score1=parseInt(document.getElementById("score"+id1)?.value)||0;
-    const score2=t2?parseInt(document.getElementById("score"+id2)?.value)||0:0;
-    t1.score=score1; if(t2)t2.score=score2;
-
-    let winner=t1, loser=t2;
-    if(t2 && score2>score1){ winner=t2; loser=t1; }
-
-    if(loser && !currentTournament.losers.find(x=>x.id===loser.id)) currentTournament.losers.push(loser);
-    if(loser) currentTournament.teams=currentTournament.teams.filter(x=>x.id!==loser.id);
-
-    saveTournaments();
-    saveCurrentTournament();
-    updateBrackets();
-}
-
-// ===== RESTORE TOURNAMENT ON PAGE LOAD =====
-window.onload = () => {
-    const savedId = localStorage.getItem("currentTournamentId");
-    if(savedId){
-        currentTournament = tournaments.find(t=>t.id===savedId) || null;
-    }
-    loadTable();
-    updateBrackets();
-};
+/* INIT */
+loadTable();
+updateBrackets();
 </script>
 
 </body>
