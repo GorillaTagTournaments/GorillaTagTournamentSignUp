@@ -4,49 +4,113 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gorilla Tag Tournaments</title>
+
 <style>
-body { margin:0; font-family:Arial,sans-serif; background:#0a0a0a; color:#eaeaea; }
+body { margin:0; font-family:Arial; background:#0a0a0a; color:#eaeaea; }
 #site { display:none; }
+
 body.phone { font-size:20px; }
 body.pc { font-size:16px; }
 
 /* START SCREEN */
-#startScreen { position:fixed; inset:0; background:#111; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:100; }
-#startScreen h1 { font-size:2.5rem; margin-bottom:30px; color:#0af; text-shadow:0 0 10px #0af; }
-.startBtn { width:250px; padding:20px; margin:12px; font-size:1.3rem; border:none; border-radius:14px; background:linear-gradient(135deg,#0af,#08c); color:white; cursor:pointer; box-shadow:0 5px 15px rgba(0,0,0,0.5); }
-.startBtn:hover { transform:scale(1.05); }
+#startScreen {
+  position:fixed; inset:0;
+  background:#000;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+}
+.startBtn {
+  width:260px;
+  padding:20px;
+  margin:10px;
+  font-size:1.2rem;
+  border:none;
+  border-radius:12px;
+  background:#222;
+  color:white;
+  cursor:pointer;
+}
+.startBtn:hover { background:#333; }
 
 /* HEADER */
-header { padding:30px; text-align:center; background:linear-gradient(180deg,#141414,#0a0a0a); box-shadow:0 4px 20px rgba(0,0,0,0.7); }
-header h1 { font-size:2.5rem; letter-spacing:2px; text-shadow:0 0 15px #0af; }
+header {
+  padding:25px;
+  text-align:center;
+  background:#141414;
+}
 
 /* SECTIONS */
-.section { padding:25px; max-width:1200px; margin:0 auto 20px auto; }
-.grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.section {
+  padding:20px;
+  max-width:1100px;
+  margin:auto;
+}
+.card {
+  background:#111;
+  padding:20px;
+  border-radius:14px;
+  margin-bottom:20px;
+}
+
+/* INPUTS */
+input, button, textarea {
+  width:100%;
+  padding:14px;
+  margin-top:10px;
+  border-radius:10px;
+  border:none;
+  background:#222;
+  color:white;
+}
+input[type=number] { width:60px; text-align:center; }
+
+/* GRID */
+.grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
 body.phone .grid { grid-template-columns:1fr; }
-.card { background:linear-gradient(145deg,#111,#1a1a1a); padding:25px; border-radius:18px; box-shadow:0 8px 25px rgba(0,0,0,0.6); transition:transform 0.3s ease, box-shadow 0.3s ease; }
-.card:hover { transform:translateY(-5px); box-shadow:0 15px 40px rgba(0,0,0,0.7); }
-input, button, textarea { width:100%; padding:16px; margin-top:12px; border-radius:12px; border:none; background:#111; color:white; font-size:1rem; box-sizing:border-box; }
-input:focus, textarea:focus { outline:none; box-shadow:0 0 10px #0af; }
-body.phone input, body.phone button, body.phone textarea { padding:20px; font-size:1.2rem; }
-input[type=number] { width:60px; text-align:center; -moz-appearance:textfield; }
-input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
 
-/* BRACKET TABLE */
-.bracketTable { width:100%; border-collapse:collapse; margin-top:10px; }
-.bracketTable th, .bracketTable td { padding:10px; border-bottom:1px solid #333; text-align:center; }
-.bracketTable th { background:#222; }
-.bracketTable td input { width:50px; }
-.bracketTable button { background:#0af; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; transition:0.2s; }
-.bracketTable button:hover { transform:scale(1.05); }
+/* TABLE */
+table {
+  width:100%;
+  border-collapse:collapse;
+}
+td, th {
+  padding:10px;
+  border-bottom:1px solid #333;
+  text-align:center;
+}
 
-/* ADMIN PANEL */
-#adminPanel { display:none; margin-top:20px; }
+/* ADMIN */
+#adminPanel { display:none; }
 
 /* TOAST */
-#toast { position:fixed; bottom:20px; right:20px; background:#222; color:white; padding:15px 25px; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.5); opacity:0; pointer-events:none; transition:opacity 0.4s ease; z-index:1000; }
+#toast {
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#222;
+  padding:12px 20px;
+  border-radius:10px;
+  opacity:0;
+  transition:0.3s;
+}
 </style>
+
+<!-- EMAILJS -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+(function(){
+  emailjs.init("YOUR_PUBLIC_KEY");
+})();
+</script>
+
 </head>
+
 <body>
 
 <!-- START SCREEN -->
@@ -56,38 +120,45 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
   <button class="startBtn" onclick="setPlatform('pc')">Computer</button>
 </div>
 
-<!-- MAIN SITE -->
 <div id="site">
 
 <header>
   <h1>Gorilla Tag Tournaments</h1>
 </header>
 
-<!-- PLATFORM SETTINGS -->
+<!-- PUBLIC TOURNAMENT INFO -->
 <div class="section">
   <div class="card">
-    <h3>Platform Settings</h3>
-    <button onclick="resetPlatform()">Reset Platform Selection</button>
+    <h2>Next Tournament</h2>
+    <p>Date: <span id="publicDate">Not set</span></p>
+    <p>Time: <span id="publicTime">Not set</span></p>
+    <p><strong>Your Local Time:</strong> <span id="localTime">--</span></p>
+    <p><strong>Starts In:</strong> <span id="countdown">--</span></p>
+    <p id="publicNotes">No info yet</p>
+  </div>
+</div>
+
+<!-- PLATFORM -->
+<div class="section">
+  <div class="card">
+    <button onclick="resetPlatform()">Reset Platform</button>
   </div>
 </div>
 
 <!-- REGISTER -->
 <div class="section grid">
-  <div class="card" style="grid-column: span 2;">
+  <div class="card" style="grid-column:span 2;">
     <h2>Register</h2>
     <input id="email" placeholder="Email">
     <input id="team" placeholder="Team Name">
-    <button onclick="register()">Sign Up for Tournament</button>
+    <button onclick="register()">Register</button>
   </div>
 </div>
 
-<!-- BRACKET -->
+<!-- SCOREBOARD -->
 <div class="section">
-  <h2>Bracket</h2>
-  <h3>Winner Bracket</h3>
-  <table id="winnerTable" class="bracketTable"></table>
-  <h3>Loser Bracket</h3>
-  <table id="loserTable" class="bracketTable"></table>
+  <h2>Scoreboard</h2>
+  <table id="scoreTable"></table>
 </div>
 
 <!-- ADMIN LOGIN -->
@@ -101,169 +172,200 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; }
 <!-- ADMIN PANEL -->
 <div id="adminPanel" class="section">
   <div class="card">
-    <button onclick="toggleEdit()">Edit ScoreBoard</button>
+    <button onclick="toggleEdit()">Edit Scoreboard</button>
     <button onclick="createTournament()">Create Tournament</button>
     <button onclick="clearTeams()">Clear Teams</button>
     <button onclick="endTournament()">End Tournament</button>
+
     <h3>Tournament Info</h3>
     <input id="tournamentDate" type="date">
     <input id="tournamentTime" type="time">
-    <textarea id="tournamentNotes" placeholder="Additional Info / Notes..."></textarea>
-    <button onclick="saveTournamentInfo()">Publish Tournament</button>
+    <textarea id="tournamentNotes" placeholder="Info..."></textarea>
+    <button onclick="saveTournamentInfo()">Save Info</button>
   </div>
 
-  <div class="card" id="teamsList">
-    <h3>Registered Teams</h3>
+  <div class="card">
+    <h3>Teams</h3>
     <table>
-      <thead><tr><th>Team</th><th>Email</th><th>Actions</th></tr></thead>
       <tbody id="teamsTable"></tbody>
     </table>
   </div>
 </div>
 
+</div>
+
 <div id="toast"></div>
 
 <script>
-// PLATFORM
+
+/* PLATFORM */
 function setPlatform(type){
   localStorage.setItem("platform",type);
   document.body.className=type;
-  document.getElementById("startScreen").style.display="none";
-  document.getElementById("site").style.display="block";
+  start();
 }
 function resetPlatform(){
   localStorage.removeItem("platform");
   location.reload();
 }
+function start(){
+  document.getElementById("startScreen").style.display="none";
+  document.getElementById("site").style.display="block";
+}
 (function(){
   const saved=localStorage.getItem("platform");
-  if(saved){
-    document.body.className=saved;
-    document.getElementById("startScreen").style.display="none";
-    document.getElementById("site").style.display="block";
-  }
+  if(saved){ document.body.className=saved; start(); }
 })();
 
-// TOAST
-function showToast(msg){ const t=document.getElementById("toast"); t.textContent=msg; t.style.opacity=1; setTimeout(()=>{ t.style.opacity=0; },2500); }
+/* TOAST */
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.innerText=msg;
+  t.style.opacity=1;
+  setTimeout(()=>t.style.opacity=0,2000);
+}
 
-// DATA
+/* DATA */
 let teams=JSON.parse(localStorage.getItem("teams"))||[];
 let tournament=JSON.parse(localStorage.getItem("tournament"))||null;
+let tournamentInfo=JSON.parse(localStorage.getItem("tournamentInfo"))||{};
 let editing=false;
 let isAdmin=false;
-let tournamentInfo=JSON.parse(localStorage.getItem("tournamentInfo"))||{date:"",time:"",notes:""};
 
-// SAVE
-function save(){ 
+function save(){
   localStorage.setItem("teams",JSON.stringify(teams));
   localStorage.setItem("tournament",JSON.stringify(tournament));
   localStorage.setItem("tournamentInfo",JSON.stringify(tournamentInfo));
 }
 
-// REGISTER
+/* REGISTER + EMAIL */
 function register(){
-  const email=document.getElementById("email").value.trim();
-  const team=document.getElementById("team").value.trim()||"No Name";
-  if(!email){ alert("Enter email"); return; }
-  teams.push({id:Date.now(),team,email,promoted:false});
-  save(); generateMatches(); render(); updateTeamsList(); showToast("Team Registered!");
+  const email=document.getElementById("email").value;
+  const team=document.getElementById("team").value||"No Name";
+  if(!email) return alert("Enter email");
+
+  teams.push({id:Date.now(),team,email});
+  save(); render(); updateTeams();
+
+  emailjs.send("YOUR_SERVICE_ID","YOUR_TEMPLATE_ID",{
+    to_email: email,
+    team_name: team,
+    tournament_date: tournamentInfo.date,
+    tournament_time: tournamentInfo.time
+  }).then(()=>toast("Registered + Email Sent!"))
+    .catch(()=>toast("Registered (Email failed)"));
 }
 
-// ADMIN
+/* ADMIN */
 function login(){
   if(document.getElementById("adminPass").value==="GTag#9xL!2Qz@7"){
-    document.getElementById("adminPanel").style.display="block"; 
-    editing=false; 
     isAdmin=true;
-    updateTeamsList(); render(); showToast("Admin Logged In!"); 
-    document.getElementById("adminPass").value="";
-  } else alert("Wrong Password");
-}
-function toggleEdit(){ if(!isAdmin){ alert("Only Admins can edit!"); return; } editing=!editing; render(); }
-function createTournament(){ tournament={matches:[]}; generateMatches(); save(); render(); showToast("Tournament Created!"); }
-function endTournament(){ tournament=null; save(); render(); showToast("Tournament Ended!"); }
-function clearTeams(){ teams=[]; tournament=null; save(); render(); updateTeamsList(); showToast("All Teams Cleared!"); }
-function saveTournamentInfo(){ tournamentInfo.date=document.getElementById("tournamentDate").value; tournamentInfo.time=document.getElementById("tournamentTime").value; tournamentInfo.notes=document.getElementById("tournamentNotes").value; save(); showToast("Tournament Info Saved!"); }
-
-// MATCHES
-function generateMatches(){
-  if(!tournament) return;
-  tournament.matches=[];
-  const promotedTeams=teams.filter(t=>t.promoted);
-  for(let i=0;i<promotedTeams.length;i+=2){
-    tournament.matches.push({team1:promotedTeams[i]?.id,team2:promotedTeams[i+1]?.id,score1:0,score2:0});
+    document.getElementById("adminPanel").style.display="block";
+    toast("Logged in!");
   }
 }
+function toggleEdit(){ if(!isAdmin)return; editing=!editing; render(); }
+function createTournament(){
+  tournament={matches:[]};
+  for(let i=0;i<teams.length;i+=2){
+    tournament.matches.push({team1:teams[i],team2:teams[i+1],s1:0,s2:0});
+  }
+  save(); render();
+}
+function endTournament(){ tournament=null; save(); render(); }
+function clearTeams(){ teams=[]; tournament=null; save(); render(); updateTeams(); }
 
-// RENDER
+/* TOURNAMENT INFO */
+function saveTournamentInfo(){
+  tournamentInfo.date=document.getElementById("tournamentDate").value;
+  tournamentInfo.time=document.getElementById("tournamentTime").value;
+  tournamentInfo.notes=document.getElementById("tournamentNotes").value;
+  save();
+  updatePublic();
+  toast("Saved!");
+}
+
+/* PUBLIC + TIMEZONE + COUNTDOWN */
+function updatePublic(){
+  document.getElementById("publicDate").innerText=tournamentInfo.date||"Not set";
+  document.getElementById("publicTime").innerText=tournamentInfo.time||"Not set";
+  document.getElementById("publicNotes").innerText=tournamentInfo.notes||"No info yet";
+}
+
+function updateTime(){
+  if(!tournamentInfo.date || !tournamentInfo.time) return;
+
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const eventDate = new Date(tournamentInfo.date+"T"+tournamentInfo.time);
+
+  document.getElementById("localTime").innerText =
+    eventDate.toLocaleString([], {timeZone:tz});
+
+  const diff = eventDate - new Date();
+  if(diff<=0){ document.getElementById("countdown").innerText="Started!"; return; }
+
+  const d=Math.floor(diff/86400000);
+  const h=Math.floor(diff/3600000)%24;
+  const m=Math.floor(diff/60000)%60;
+  const s=Math.floor(diff/1000)%60;
+
+  document.getElementById("countdown").innerText =
+    `${d}d ${h}h ${m}m ${s}s`;
+}
+
+setInterval(updateTime,1000);
+
+/* SCOREBOARD */
 function render(){
-  const winnerTable=document.getElementById("winnerTable");
-  const loserTable=document.getElementById("loserTable");
-  winnerTable.innerHTML=""; loserTable.innerHTML="";
+  const table=document.getElementById("scoreTable");
+  table.innerHTML="";
   if(!tournament) return;
-  const header=`<tr><th>Team 1</th><th>Score</th><th>vs</th><th>Score</th><th>Team 2</th><th>Winner</th></tr>`;
-  winnerTable.innerHTML=header; loserTable.innerHTML=header;
 
   tournament.matches.forEach((m,i)=>{
-    const t1=teams.find(t=>t.id===m.team1);
-    const t2=teams.find(t=>t.id===m.team2);
-
-    const rowW=document.createElement("tr");
-    rowW.innerHTML=`
-      <td>${t1?.team||"TBD"}</td>
-      <td><input type="number" value="${m.score1}" ${editing?"":"disabled"}></td>
-      <td>vs</td>
-      <td><input type="number" value="${m.score2}" ${editing?"":"disabled"}></td>
-      <td>${t2?.team||"TBD"}</td>
-      <td><button onclick="setWinner(${i})">${editing?"Set Winner":""}</button></td>
-    `;
-    const inputs=rowW.querySelectorAll("input");
-    inputs[0].oninput=()=>{ if(editing){ m.score1=parseInt(inputs[0].value)||0; save(); } };
-    inputs[1].oninput=()=>{ if(editing){ m.score2=parseInt(inputs[1].value)||0; save(); } };
-    winnerTable.appendChild(rowW);
-
-    const rowL=rowW.cloneNode(true);
-    loserTable.appendChild(rowL);
-  });
-}
-
-// TEAMS LIST
-function updateTeamsList(){
-  const tbody=document.getElementById("teamsTable"); tbody.innerHTML="";
-  teams.forEach((t,i)=>{
     const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${t.team}</td><td>${t.email}</td>
-      <td>
-        <button onclick="editTeam(${i})">Edit</button>
-        <button onclick="deleteTeam(${i})">Delete</button>
-        <button onclick="promoteTeam(${i})">${t.promoted?'Demote':'Promote'}</button>
-      </td>`;
-    tbody.appendChild(tr);
+
+    tr.innerHTML=`
+      <td>${m.team1?.team||"TBD"}</td>
+      <td><input type="number" value="${m.s1}" ${editing?"":"disabled"}></td>
+      <td>vs</td>
+      <td><input type="number" value="${m.s2}" ${editing?"":"disabled"}></td>
+      <td>${m.team2?.team||"TBD"}</td>
+      <td>${isAdmin?`<button onclick="setWinner(${i})">Set Winner</button>`:""}</td>
+    `;
+
+    const inputs=tr.querySelectorAll("input");
+    if(inputs[0]) inputs[0].oninput=()=>{ m.s1=parseInt(inputs[0].value)||0; save(); };
+    if(inputs[1]) inputs[1].oninput=()=>{ m.s2=parseInt(inputs[1].value)||0; save(); };
+
+    table.appendChild(tr);
   });
 }
 
-function deleteTeam(index){ teams.splice(index,1); save(); generateMatches(); render(); updateTeamsList(); showToast("Team Deleted"); }
-function editTeam(index){ if(!isAdmin){ alert("Only Admins can edit!"); return; } const newTeam=prompt("Edit Team Name:",teams[index].team); if(newTeam!==null){ teams[index].team=newTeam; save(); generateMatches(); render(); updateTeamsList(); showToast("Team Edited"); } }
-function promoteTeam(index){ if(!isAdmin){ alert("Only Admins can promote!"); return; } teams[index].promoted=!teams[index].promoted; save(); generateMatches(); render(); updateTeamsList(); showToast(teams[index].promoted?"Team Promoted!":"Team Demoted!"); }
-
-// SET WINNER
-function setWinner(matchIndex){
-  if(!isAdmin){ alert("Only Admins can set winner!"); return; }
-  const m=tournament.matches[matchIndex];
-  const t1=teams.find(t=>t.id===m.team1);
-  const t2=teams.find(t=>t.id===m.team2);
-  if(!t1||!t2) return;
-  let winner = m.score1>m.score2 ? t1.team : m.score2>m.score1 ? t2.team : null;
-  if(!winner){ alert("Draw! Adjust scores."); return; }
-  showToast(`Winner: ${winner}`);
-  save();
+/* WINNER */
+function setWinner(i){
+  if(!isAdmin) return;
+  const m=tournament.matches[i];
+  if(m.s1===m.s2) return alert("Draw!");
+  alert((m.s1>m.s2?m.team1.team:m.team2.team)+" wins!");
 }
 
-render(); updateTeamsList();
-document.getElementById("tournamentDate").value=tournamentInfo.date;
-document.getElementById("tournamentTime").value=tournamentInfo.time;
-document.getElementById("tournamentNotes").value=tournamentInfo.notes;
+/* TEAMS */
+function updateTeams(){
+  const t=document.getElementById("teamsTable");
+  t.innerHTML="";
+  teams.forEach((team,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${team.team}</td><td>${team.email}</td>
+    <td><button onclick="teams.splice(${i},1);save();render();updateTeams()">Delete</button></td>`;
+    t.appendChild(tr);
+  });
+}
+
+/* INIT */
+render();
+updateTeams();
+updatePublic();
+
 </script>
 </body>
 </html>
