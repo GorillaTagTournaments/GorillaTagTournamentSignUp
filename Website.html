@@ -15,7 +15,6 @@ body {
 
 #site { display:none; }
 
-/* PLATFORM */
 body.phone { font-size:20px; }
 body.pc { font-size:16px; }
 
@@ -42,7 +41,7 @@ body.pc { font-size:16px; }
   cursor:pointer;
 }
 
-/* HEADER TITLE */
+/* HEADER */
 header {
   text-align:center;
   padding:30px 20px;
@@ -66,15 +65,17 @@ header {
   margin:auto;
 }
 
+/* ✅ FIXED CARD */
 .card {
   background:#111;
   padding:20px;
   border-radius:12px;
   margin-bottom:20px;
-  overflow:hidden;
+
+  overflow:hidden; /* 🔥 prevents overflow */
 }
 
-/* INPUT FIX */
+/* ✅ FIXED INPUTS + BUTTONS */
 input, button {
   width:100%;
   padding:14px;
@@ -83,22 +84,10 @@ input, button {
   border-radius:10px;
   background:#222;
   color:white;
-  box-sizing:border-box;
-}
 
-input[type=number] {
-  width:60px;
-}
-
-/* GRID */
-.grid {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:15px;
-}
-
-body.phone .grid {
-  grid-template-columns:1fr;
+  box-sizing:border-box; /* 🔥 KEY FIX */
+  max-width:100%;
+  display:block;
 }
 
 /* TABLE */
@@ -143,13 +132,16 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-</script>
 
+/* CONNECTION DEBUG */
+firebase.database().ref(".info/connected").on("value", snap => {
+  console.log(snap.val() ? "✅ Connected to Firebase" : "❌ NOT connected");
+});
+</script>
 </head>
 
 <body>
 
-<!-- START SCREEN -->
 <div id="startScreen">
   <h1>Select Platform</h1>
   <button class="startBtn" onclick="setPlatform('phone')">Phone</button>
@@ -168,7 +160,6 @@ const db = firebase.database();
 <button onclick="resetPlatform()">Reset Platform</button>
 </div>
 
-<!-- TOURNAMENT INFO -->
 <div class="card">
 <h2>Next Tournament</h2>
 <p>Date: <span id="publicDate">Not set</span></p>
@@ -178,7 +169,6 @@ const db = firebase.database();
 <p id="publicNotes">No info</p>
 </div>
 
-<!-- REGISTER -->
 <div class="card">
 <h2>Register</h2>
 <input id="email" placeholder="Email">
@@ -186,19 +176,16 @@ const db = firebase.database();
 <button onclick="register()">Register</button>
 </div>
 
-<!-- SCOREBOARD -->
 <div class="card">
 <h2>Scoreboard</h2>
 <table id="scoreTable"></table>
 </div>
 
-<!-- ADMIN LOGIN -->
 <div class="card">
 <input id="adminPass" type="password" placeholder="Admin Password">
 <button onclick="login()">Login</button>
 </div>
 
-<!-- ADMIN PANEL -->
 <div id="adminPanel" style="display:none;">
 
 <div class="card">
@@ -265,15 +252,21 @@ function toast(msg){
 
 /* REGISTER */
 function register(){
-  const email=document.getElementById("email").value;
-  const team=document.getElementById("team").value || "No Name";
+  const email = document.getElementById("email").value.trim();
+  const team = document.getElementById("team").value.trim() || "No Name";
 
   if(!email) return toast("Enter Email");
 
-  const id=Date.now();
-  db.ref("teams/"+id).set({id,team,email});
-
-  toast("Registered!");
+  db.ref("teams").push({
+    team: team,
+    email: email,
+    createdAt: Date.now()
+  })
+  .then(() => {
+    toast("Registered!");
+    document.getElementById("email").value = "";
+    document.getElementById("team").value = "";
+  });
 }
 
 /* ADMIN */
@@ -285,9 +278,7 @@ function login(){
     isAdmin=true;
     document.getElementById("adminPanel").style.display="block";
     toast("Logged in!");
-  } else {
-    toast("Wrong password");
-  }
+  } else toast("Wrong password");
 }
 
 function toggleEdit(){
@@ -295,38 +286,24 @@ function toggleEdit(){
   toast(editing ? "Editing Enabled" : "Editing Disabled");
 }
 
-/* TEAMS LIVE */
-db.ref("teams").on("value",snap=>{
-  const data=snap.val()||{};
-  const table=document.getElementById("teamsTable");
+/* TEAMS */
+db.ref("teams").on("value", snap => {
+  const data = snap.val();
+  const table = document.getElementById("teamsTable");
   table.innerHTML="";
 
+  if(!data){
+    table.innerHTML="<tr><td>No teams yet</td></tr>";
+    return;
+  }
+
   Object.values(data).forEach(t=>{
+    if(!t) return;
     const tr=document.createElement("tr");
-    tr.innerHTML=`<td>${t.team}</td><td>${t.email}</td>`;
+    tr.innerHTML=`<td>${t.team||"No Name"}</td><td>${t.email||"-"}</td>`;
     table.appendChild(tr);
   });
 });
-
-/* CREATE TOURNAMENT */
-function createTournament(){
-  db.ref("teams").once("value").then(snap=>{
-    const teams=Object.values(snap.val()||{});
-    const matches=[];
-
-    for(let i=0;i<teams.length;i+=2){
-      matches.push({
-        team1:teams[i]?.team,
-        team2:teams[i+1]?.team,
-        s1:0,
-        s2:0
-      });
-    }
-
-    db.ref("matches").set(matches);
-    toast("Tournament Created!");
-  });
-}
 
 /* SCOREBOARD */
 db.ref("matches").on("value",snap=>{
@@ -354,28 +331,22 @@ db.ref("matches").on("value",snap=>{
   });
 });
 
-/* TOURNAMENT INFO */
-function saveTournamentInfo(){
-  db.ref("tournamentInfo").set({
-    date: tDate.value,
-    time: tTime.value,
-    notes: tNotes.value
-  });
+/* COUNTDOWN */
+let countdownInterval;
 
-  toast("Saved!");
-}
-
-db.ref("tournamentInfo").on("value",snap=>{
+db.ref("tournamentInfo").on("value", snap => {
   const d=snap.val()||{};
 
   publicDate.innerText=d.date||"Not set";
   publicTime.innerText=d.time||"Not set";
   publicNotes.innerText=d.notes||"No info";
 
+  if(countdownInterval) clearInterval(countdownInterval);
+
   if(d.date && d.time){
     const event=new Date(d.date+"T"+d.time);
 
-    setInterval(()=>{
+    countdownInterval=setInterval(()=>{
       const diff=event-new Date();
 
       if(diff<=0){
@@ -393,7 +364,34 @@ db.ref("tournamentInfo").on("value",snap=>{
   }
 });
 
-/* CLEAR */
+function createTournament(){
+  db.ref("teams").once("value").then(snap=>{
+    const teams=Object.values(snap.val()||{});
+    const matches=[];
+
+    for(let i=0;i<teams.length;i+=2){
+      matches.push({
+        team1:teams[i]?.team,
+        team2:teams[i+1]?.team,
+        s1:0,
+        s2:0
+      });
+    }
+
+    db.ref("matches").set(matches);
+    toast("Tournament Created!");
+  });
+}
+
+function saveTournamentInfo(){
+  db.ref("tournamentInfo").set({
+    date: tDate.value,
+    time: tTime.value,
+    notes: tNotes.value
+  });
+  toast("Saved!");
+}
+
 function clearAll(){
   db.ref("teams").remove();
   db.ref("matches").remove();
